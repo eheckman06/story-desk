@@ -1,0 +1,56 @@
+{
+  "rss_feeds": [
+    {
+      "id": "google_dallas_culture",
+      "name": "Google News — Dallas culture",
+      "url": "https://news.google.com/rss/search?q=Dallas+influencer+OR+culture+OR+%22social+media%22+when:7d&hl=en-US&gl=US&ceid=US:en",
+      "weight": 1.0
+    },
+    {
+      "id": "google_dallas_influencer",
+      "name": "Google News — Dallas creator",
+      "url": "https://news.google.com/rss/search?q=Dallas+TikTok+OR+YouTuber+OR+creator+when:7d&hl=en-US&gl=US&ceid=US:en",
+      "weight": 1.0
+    },
+    {
+      "id": "google_dfw_local",
+      "name": "Google News — DFW culture local",
+      "url": "https://news.google.com/rss/search?q=DFW+%22North+Texas%22+culture+OR+school+OR+church+when:7d&hl=en-US&gl=US&ceid=US:en",
+      "weight": 0.95
+    },
+    {
+      "id": "google_influencer_culture",
+      "name": "Google News — Influencer culture",
+      "url": "https://news.google.com/rss/search?q=influencer+culture+viral+when:3d&hl=en-US&gl=US&ceid=US:en",
+      "weight": 0.9
+    },
+    {
+      "id": "fox_latest",
+      "name": "Fox News — Latest",
+      "url": "https://moxie.foxnews.com/google-publisher/latest.xml",
+      "weight": 0.75
+    },
+    {
+      "id": "fox_us",
+      "name": "Fox News — U.S.",
+      "url": "https://moxie.foxnews.com/google-publisher/us.xml",
+      "weight": 0.8
+    },
+    {
+      "id": "dailywire",
+      "name": "Daily Wire",
+      "url": "https://www.dailywire.com/feeds/rss.xml",
+      "weight": 0.7
+    },
+    {
+      "id": "breitbart",
+      "name": "Breitbart",
+      "url": "https://feeds.feedburner.com/breitbart",
+      "weight": 0.6
+    }
+  ],
+  "bright_data": {
+    "enabled": false,
+    "note": "Set BRIGHT_DATA_API_TOKEN and enabled=true to add live SERP discovery via Bright Data MCP or Web Unlocker."
+  }
+}

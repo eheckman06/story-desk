@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+data/story_desk.db
+data/daily/*
+data/logs/
+data/.env
+site/

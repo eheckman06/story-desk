@@ -1,0 +1,116 @@
+{
+  "author": "Elizabeth Heckman",
+  "profile_url": "https://www.foxnews.com/person/h/elizabeth-heckman",
+  "bio_summary": "Culture, media, and social trends — with Dallas/DFW local angles and influencer-driven stories.",
+  "daily_targets": {
+    "pitches": 10,
+    "timely": 7,
+    "evergreen": 3
+  },
+  "focus": {
+    "categories": ["culture_media", "dallas_local", "influencer"],
+    "description": "10 culture/media pitches daily — Dallas-area local or influencer topics, each with a suggested interview guest."
+  },
+  "themes": [
+    {
+      "id": "dallas_local",
+      "label": "Dallas / DFW local",
+      "weight": 1.4,
+      "keywords": [
+        "dallas", "dfw", "fort worth", "plano", "frisco", "arlington", "mckinney",
+        "richardson", "garland", "irving", "deep ellum", "uptown dallas", "north texas",
+        "dfw airport", "smu", "dallas isd", "collin county", "tarrant county"
+      ],
+      "interview_signals": [
+        "dallas", "resident", "local", "neighbor", "business owner", "pastor", "parent"
+      ]
+    },
+    {
+      "id": "culture_social",
+      "label": "Culture & social media",
+      "weight": 1.3,
+      "keywords": [
+        "influencer", "viral", "tiktok", "youtube", "podcast", "trend", "social media",
+        "creator", "content creator", "went viral", "instagram", "streamer", "meme",
+        "backlash", "cancel", "culture war", "gen z"
+      ],
+      "interview_signals": [
+        "influencer", "creator", "youtuber", "podcaster", "speaks out", "told"
+      ]
+    },
+    {
+      "id": "media_hollywood",
+      "label": "Media & platform drama",
+      "weight": 1.1,
+      "keywords": [
+        "streaming", "platform", "algorithm", "creator economy", "newsroom", "broadcast",
+        "podcast", "substack", "youtube", "tiktok ban", "influencer marketing",
+        "hollywood", "late night", "viral video"
+      ],
+      "interview_signals": [
+        "host", "creator", "journalist", "influencer", "commentator"
+      ]
+    },
+    {
+      "id": "conservative_voices",
+      "label": "Conservative voices & campus culture",
+      "weight": 1.0,
+      "keywords": [
+        "conservative", "tpusa", "campus", "college", "gen z", "maga", "young conservative"
+      ],
+      "interview_signals": [
+        "conservative", "activist", "student", "commentator", "influencer"
+      ]
+    },
+    {
+      "id": "free_speech",
+      "label": "Free speech & cancel culture",
+      "weight": 0.95,
+      "keywords": [
+        "canceled", "cancelled", "backlash", "deplatform", "free speech", "disinvited"
+      ],
+      "interview_signals": [
+        "speaker", "student", "creator", "professor"
+      ]
+    },
+    {
+      "id": "faith_culture_clash",
+      "label": "Faith & culture clash",
+      "weight": 0.9,
+      "keywords": [
+        "church", "christian", "faith", "school board", "parent", "culture"
+      ],
+      "interview_signals": [
+        "pastor", "parent", "organizer", "student"
+      ]
+    },
+    {
+      "id": "everyday_pov",
+      "label": "Everyday people with a strong POV",
+      "weight": 1.0,
+      "keywords": [
+        "family says", "no regrets", "rejected", "small business", "local woman", "local man"
+      ],
+      "interview_signals": [
+        "family", "mother", "father", "resident", "owner"
+      ]
+    }
+  ],
+  "pitch_types": [
+    {
+      "id": "dallas_local",
+      "label": "Dallas / DFW local",
+      "hint": "On-the-ground Dallas character with a culture or media hook."
+    },
+    {
+      "id": "influencer",
+      "label": "Influencer / creator",
+      "hint": "Viral creator, podcaster, or platform personality worth profiling."
+    },
+    {
+      "id": "culture_media",
+      "label": "Culture / media trend",
+      "hint": "Broader trend you can localize with a Dallas source or parallel."
+    }
+  ]
+}
