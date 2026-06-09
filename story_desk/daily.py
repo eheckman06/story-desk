@@ -86,6 +86,10 @@ def run_daily(run_date: date | None = None) -> dict:
     outputs = write_daily_outputs(pitches, run_date)
     site_dir = publish_site()
 
+    from story_desk.database_view import write_database_html
+
+    db_html = write_database_html()
+
     return {
         "date": run_date.isoformat(),
         "fetched": len(raw_stories),
@@ -93,5 +97,6 @@ def run_daily(run_date: date | None = None) -> dict:
         "timely": len(timely_pitches),
         "evergreen": len(evergreen_pitches),
         "site_dir": str(site_dir),
+        "database_html": str(db_html),
         **outputs,
     }

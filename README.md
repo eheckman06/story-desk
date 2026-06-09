@@ -6,14 +6,11 @@ Your daily culture/media pitch list for **Elizabeth Heckman's Fox Digital beat**
 
 ### 1. Cursor tab (recommended in the app)
 
-After each run, open the **Story Desk** canvas in Cursor:
+**Today's pitches:** open **Canvas → `story-desk`**
 
-1. In the chat panel, click **Canvas** (or open the canvas picker)
-2. Choose **`story-desk`** (`story-desk.canvas.tsx`)
+**Full database** (search stories, interview subjects, daily picks): open **Canvas → `story-desk-database`**
 
-Or double-click: `open_desk.command` opens the browser version locally.
-
-The canvas updates whenever `run_daily.py` runs (local or cloud).
+Or double-click: `open_desk.command` (pitches) · `open_database.command` (database browser)
 
 ### 2. Cloud website (works when your computer is off)
 
@@ -38,7 +35,14 @@ gh repo create story-desk --public --source=. --push
 ### 3. Local file (same Mac)
 
 ```text
-~/Projects/story-desk/data/latest.html
+~/Projects/story-desk/data/latest.html       — today's pitches
+~/Projects/story-desk/data/database.html     — interactive database browser
+```
+
+Refresh the database view anytime:
+
+```bash
+python3 ~/Projects/story-desk/scripts/refresh_database.py
 ```
 
 ## What's in each run

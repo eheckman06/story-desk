@@ -22,6 +22,13 @@ def publish_site() -> Path:
     if latest_json.exists():
         shutil.copy2(latest_json, SITE_DIR / "latest.json")
 
+    db_html = ROOT / "data" / "database.html"
+    db_json = ROOT / "data" / "database.json"
+    if db_html.exists():
+        shutil.copy2(db_html, SITE_DIR / "database.html")
+    if db_json.exists():
+        shutil.copy2(db_json, SITE_DIR / "database.json")
+
     meta = {}
     if latest_json.exists():
         meta = json.loads(latest_json.read_text())
