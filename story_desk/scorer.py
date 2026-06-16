@@ -5,6 +5,14 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 
+from story_desk.appeal import (
+    has_dallas_geo,
+    has_national_appeal,
+    hyperlocal_penalty,
+    national_appeal_bonus,
+    story_text,
+)
+
 FRESHNESS_BONUS = {
     6: 12,
     24: 8,
@@ -46,14 +54,17 @@ def _match_themes(text: str, themes: list[dict]) -> list[tuple[str, str, float]]
 
 def _story_angle(title: str, summary: str, themes: list[tuple[str, str, float]]) -> str:
     labels = [label for _, label, _ in themes[:3]]
+    text = f"{title} {summary}".lower()
     if not labels:
-        return "Monitor for a human-interest or culture angle."
+        return "Monitor for a human-interest or culture angle with national stakes."
     if any("Dallas" in label or "DFW" in label for label in labels):
-        return "Dallas/DFW culture or local story — lead with a neighborhood character."
+        if has_national_appeal(text):
+            return "Texas/local dateline with national culture or influencer stakes — lead with the person in the conflict."
+        return "DFW mention only — needs a national hook (viral moment, policy fight, named creator) before pitching."
     if any("Culture" in label or "social" in label.lower() for label in labels):
-        return "Culture/social media story with a strong personal voice."
+        return "National culture/social media story with a strong personal voice."
     if any("Media" in label or "platform" in label.lower() for label in labels):
-        return "Media/platform trend worth profiling with a creator or local source."
+        return "National media/platform trend — profile the creator or source driving it."
     if any("Free speech" in label for label in labels):
         return "Campus or public figure facing backlash — good for first-person interviews."
     if any("Border" in label for label in labels):
@@ -75,7 +86,7 @@ def _why_now(title: str, summary: str, hours: float | None) -> str:
 
 
 def score_story(story: dict, themes: list[dict]) -> dict:
-    text = f"{story['title']} {story.get('summary', '')}"
+    text = story_text(story)
     theme_hits = _match_themes(text, themes)
     theme_score = sum(weight for _, _, weight in theme_hits) * 10
     source_bonus = story.get("source_weight", 1.0) * 5
@@ -88,36 +99,35 @@ def score_story(story: dict, themes: list[dict]) -> dict:
         "says", "family", "student", "influencer", "parent", "reporter",
         "speaks out", "moved to", "rejected", "viral", "attacked"
     )
-    lowered = text.lower()
-    human_bonus += sum(4 for marker in human_markers if marker in lowered)
+    human_bonus += sum(4 for marker in human_markers if marker in text)
 
-    dallas_markers = ("dallas", "dfw", "fort worth", "plano", "frisco", "north texas")
     influencer_markers = ("influencer", "tiktok", "creator", "viral", "youtube", "instagram")
-    if any(m in lowered for m in dallas_markers):
-        human_bonus += 15
-    if any(m in lowered for m in influencer_markers):
+    if any(m in text for m in influencer_markers):
         human_bonus += 10
-    if any(m in lowered for m in ("culture", "media", "podcast", "streaming")):
+    if any(m in text for m in ("culture", "media", "podcast", "streaming")):
         human_bonus += 6
+    if has_dallas_geo(text) and has_national_appeal(text):
+        human_bonus += 10
 
-    penalty = 0
+    penalty = hyperlocal_penalty(story)
     non_culture_dallas = (
         "airport", "terminal", "gate", "runway", "traffic", "highway", "weather",
         "forecast", "bond election", "property tax", "zoning"
     )
-    if any(m in lowered for m in non_culture_dallas) and not any(
-        m in lowered for m in influencer_markers + ("culture", "media", "school", "student", "church")
-    ):
+    if any(m in text for m in non_culture_dallas) and not has_national_appeal(text):
         penalty += 20
 
-    if re.search(r"\b(says|warns|claims|slams|blasts|vows)\b.*\b(biden|trump|democrat|republican|homan|johnson)\b", lowered):
+    if re.search(r"\b(says|warns|claims|slams|blasts|vows)\b.*\b(biden|trump|democrat|republican|homan|johnson)\b", text):
         penalty += 8
-    if re.search(r"\b(nfl|goodell|hearing|testify|congress|senate|house)\b", lowered) and "broadcast" not in lowered and "streaming" not in lowered:
+    if re.search(r"\b(nfl|goodell|hearing|testify|congress|senate|house)\b", text) and "broadcast" not in text and "streaming" not in text:
         penalty += 12
-    if "vows" in lowered and not any(m in lowered for m in human_markers):
+    if "vows" in text and not any(m in text for m in human_markers):
         penalty += 6
 
-    score = round(theme_score + source_bonus + freshness + human_bonus - penalty, 1)
+    score = round(
+        theme_score + source_bonus + freshness + human_bonus + national_appeal_bonus(story) - penalty,
+        1,
+    )
     labels = [label for _, label, _ in theme_hits]
 
     return {

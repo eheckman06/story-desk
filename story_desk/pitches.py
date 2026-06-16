@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import re
-
+from story_desk.appeal import has_dallas_geo, has_national_appeal, is_too_local_for_national, story_text
+from story_desk.dedup import is_repeat_of_prior
 from story_desk.names import build_interview_plan, extract_people
 
 DALLAS_MARKERS = (
@@ -23,56 +23,55 @@ CULTURE_MARKERS = (
 
 
 def _classify_pitch(story: dict) -> str:
-    text = f"{story['title']} {story.get('summary', '')}".lower()
-    if any(m in text for m in DALLAS_MARKERS):
-        return "dallas_local"
+    text = story_text(story)
     if any(m in text for m in INFLUENCER_MARKERS):
         return "influencer"
+    if has_dallas_geo(text) and has_national_appeal(text):
+        return "dallas_local"
     return "culture_media"
 
 
 def _pitch_type_label(pitch_type: str) -> str:
     return {
-        "dallas_local": "Dallas / DFW local",
+        "dallas_local": "Dallas / DFW — national hook",
         "influencer": "Influencer / creator",
         "culture_media": "Culture / media trend",
     }.get(pitch_type, "Culture / media")
 
 
 def _localize_note(story: dict, pitch_type: str) -> str:
-    text = f"{story['title']} {story.get('summary', '')}".lower()
+    text = story_text(story)
     if pitch_type == "dallas_local":
-        return "Direct Dallas/DFW story — lead with a neighborhood character."
+        return "National story with a Texas dateline — interview the named source; don't pitch pure neighborhood news."
     if pitch_type == "influencer":
-        if any(m in text for m in DALLAS_MARKERS):
-            return "Dallas-linked influencer angle — profile the creator, not just the trend."
-        return "National influencer story — interview the named creator or localize with Dallas MOTS."
-    if any(m in text for m in DALLAS_MARKERS):
-        return "Local hook available — frame as a DFW culture piece."
-    return "National culture/media trend — named source, event coverage, or Dallas man-on-the-street."
+        if has_dallas_geo(text):
+            return "Creator story with Dallas ties — profile the person driving the national conversation."
+        return "National creator/platform story — interview the named influencer or expert, not local MOTS filler."
+    if has_dallas_geo(text) and has_national_appeal(text):
+        return "Optional Texas B-roll — only if the named national source is unavailable."
+    return "National culture/media trend — lead with the person or platform driving the story nationwide."
 
 
 def _is_on_brief(story: dict) -> bool:
-    text = f"{story['title']} {story.get('summary', '')}".lower()
-    has_dallas = any(m in text for m in DALLAS_MARKERS)
+    if is_too_local_for_national(story):
+        return False
+    text = story_text(story)
     has_influencer = any(m in text for m in INFLUENCER_MARKERS)
     has_culture = any(m in text for m in CULTURE_MARKERS)
     theme_hits = story.get("theme_hits", "").lower()
     has_theme = any(
         token in theme_hits
-        for token in ("culture", "social", "media", "dallas", "influencer", "dfw")
+        for token in ("culture", "social", "media", "influencer")
     )
-    return has_dallas or has_influencer or (has_culture and has_theme)
+    if has_influencer or (has_culture and has_theme):
+        return True
+    return has_dallas_geo(text) and has_national_appeal(text)
 
 
 def _topic_key(headline: str) -> str:
-    words = re.sub(r"[^a-z0-9\s]", " ", headline.lower()).split()
-    stop = {
-        "the", "a", "an", "in", "at", "for", "to", "of", "and", "with", "on", "new", "says",
-        "here", "this", "how", "much", "have", "has", "since", "2025", "2026",
-    }
-    tokens = [w for w in words if w not in stop and len(w) > 2][:8]
-    return " ".join(sorted(tokens))
+    from story_desk.db import topic_key_from_title
+
+    return topic_key_from_title(headline)
 
 
 def _interview_priority(story: dict, plan: dict) -> int:
@@ -84,7 +83,15 @@ def _interview_priority(story: dict, plan: dict) -> int:
     return 1
 
 
-def build_pitches(stories: list[dict], themes: list[dict], limit: int = 10) -> list[dict]:
+def build_pitches(
+    stories: list[dict],
+    themes: list[dict],
+    limit: int = 10,
+    *,
+    exclude_urls: set[str] | None = None,
+    exclude_topic_keys: set[str] | None = None,
+    exclude_titles: list[str] | None = None,
+) -> list[dict]:
     on_brief = [s for s in stories if _is_on_brief(s)]
     pool = on_brief if len(on_brief) >= limit else stories
 
@@ -99,24 +106,30 @@ def build_pitches(stories: list[dict], themes: list[dict], limit: int = 10) -> l
     candidates.sort(key=lambda item: item[3], reverse=True)
 
     pitches: list[dict] = []
-    seen_urls: set[str] = set()
-    seen_topics: set[str] = set()
+    seen_urls: set[str] = set(exclude_urls or ())
+    seen_topics: set[str] = set(exclude_topic_keys or ())
+    seen_titles: list[str] = list(exclude_titles or ())
     type_counts = {"dallas_local": 0, "influencer": 0, "culture_media": 0}
 
     def _accept(story: dict) -> bool:
         if story["url"] in seen_urls:
             return False
-        key = _topic_key(story["title"])
-        if key in seen_topics:
+        title = story["title"]
+        if _topic_key(title) in seen_topics:
+            return False
+        if is_repeat_of_prior(title, seen_titles):
             return False
         return True
 
     def _remember(story: dict) -> None:
         seen_urls.add(story["url"])
         seen_topics.add(_topic_key(story["title"]))
+        seen_titles.append(story["title"])
 
     for story, plan, pitch_type, _ in candidates:
         if not _accept(story):
+            continue
+        if pitch_type == "dallas_local" and type_counts[pitch_type] >= max(limit // 4 + 1, 2):
             continue
         if type_counts[pitch_type] >= max(limit // 3 + 1, 3):
             continue

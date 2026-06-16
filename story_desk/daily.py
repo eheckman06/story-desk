@@ -5,7 +5,14 @@ from __future__ import annotations
 from datetime import date
 
 from story_desk.config_loader import load_sources, load_themes
-from story_desk.db import connect, init_db, insert_interview_subject, insert_story, record_daily_pick
+from story_desk.db import (
+    connect,
+    init_db,
+    insert_interview_subject,
+    insert_story,
+    pick_exclusions_for_date,
+    record_daily_pick,
+)
 from story_desk.evergreen import pick_evergreen_pitches
 from story_desk.fetch import fetch_all_feeds
 from story_desk.interview import extract_subjects, rank_subjects
@@ -46,7 +53,15 @@ def run_daily(run_date: date | None = None) -> dict:
     raw_stories = fetch_all_feeds(sources_cfg["rss_feeds"])
     ranked_stories = rank_stories(raw_stories, themes, limit=120)
     ranked_subjects = rank_subjects(ranked_stories, themes, limit=80)
-    timely_pitches = build_pitches(ranked_stories, themes, limit=timely_count)
+    exclude_urls, exclude_topics, exclude_titles = pick_exclusions_for_date(run_date)
+    timely_pitches = build_pitches(
+        ranked_stories,
+        themes,
+        limit=timely_count,
+        exclude_urls=exclude_urls,
+        exclude_topic_keys=exclude_topics,
+        exclude_titles=exclude_titles,
+    )
     evergreen_pitches = pick_evergreen_pitches(run_date, count=evergreen_count)
     pitches = _merge_pitches(timely_pitches, evergreen_pitches)[:pitch_target]
 
@@ -62,7 +77,7 @@ def run_daily(run_date: date | None = None) -> dict:
                 conn,
                 {
                     "pick_date": pick_date,
-                    "pick_type": "pitch",
+                    "pick_type": "evergreen" if pitch.get("source_kind") == "evergreen" else "timely",
                     "rank": pitch["rank"],
                     "title": pitch["headline"],
                     "detail": f"{pitch['guest_name']} | {pitch['localize']}",

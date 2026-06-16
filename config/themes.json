@@ -1,7 +1,7 @@
 {
   "author": "Elizabeth Heckman",
   "profile_url": "https://www.foxnews.com/person/h/elizabeth-heckman",
-  "bio_summary": "Culture, media, and social trends — with Dallas/DFW local angles and influencer-driven stories.",
+  "bio_summary": "National culture, media, and social trends — influencer-driven stories and Texas datelines only when they have national stakes.",
   "daily_targets": {
     "pitches": 10,
     "timely": 7,
@@ -9,13 +9,13 @@
   },
   "focus": {
     "categories": ["culture_media", "dallas_local", "influencer"],
-    "description": "10 culture/media pitches daily — Dallas-area local or influencer topics, each with a suggested interview guest."
+    "description": "10 national culture/media pitches daily — creator and platform stories first; DFW only when the hook travels nationally."
   },
   "themes": [
     {
       "id": "dallas_local",
-      "label": "Dallas / DFW local",
-      "weight": 1.4,
+      "label": "Dallas / DFW — national hook",
+      "weight": 1.05,
       "keywords": [
         "dallas", "dfw", "fort worth", "plano", "frisco", "arlington", "mckinney",
         "richardson", "garland", "irving", "deep ellum", "uptown dallas", "north texas",
@@ -99,8 +99,8 @@
   "pitch_types": [
     {
       "id": "dallas_local",
-      "label": "Dallas / DFW local",
-      "hint": "On-the-ground Dallas character with a culture or media hook."
+      "label": "Dallas / DFW — national hook",
+      "hint": "Texas dateline only when the story is already trending nationally (viral creator, culture clash, policy fight)."
     },
     {
       "id": "influencer",
