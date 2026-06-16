@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+import re
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -122,3 +123,58 @@ def recent_story_urls(conn: sqlite3.Connection, days: int = 14) -> set[str]:
         (f"-{days} days",),
     ).fetchall()
     return {row["url"] for row in rows}
+
+
+from story_desk.dedup import is_repeat_of_prior
+
+
+def topic_key_from_title(title: str) -> str:
+    """Stable fingerprint for deduping similar headlines across runs."""
+    words = re.sub(r"[^a-z0-9\s]", " ", title.lower()).split()
+    stop = {
+        "the", "a", "an", "in", "at", "for", "to", "of", "and", "with", "on", "new", "says",
+        "here", "this", "how", "much", "have", "has", "since", "2025", "2026",
+    }
+    tokens = [w for w in words if w not in stop and len(w) > 2][:8]
+    return " ".join(sorted(tokens))
+
+
+def pick_exclusions_for_date(run_date: date) -> tuple[set[str], set[str], list[str]]:
+    """
+    URLs, topic keys, and prior titles to skip so weekday runs stay fresh.
+
+    Tue–Fri: exclude timely picks from Monday of this week through today (inclusive).
+    Monday: exclude only the prior Tue–Fri window so Saturday/Sunday picks may repeat.
+    Sat–Sun: exclude same-day picks only (weekend refresh).
+    """
+    weekday = run_date.weekday()
+    run_iso = run_date.isoformat()
+
+    if weekday == 0:
+        start = (run_date - timedelta(days=6)).isoformat()
+        end = (run_date - timedelta(days=3)).isoformat()
+        clause = "pick_date >= ? AND pick_date <= ?"
+        params: tuple[str, ...] = (start, end)
+    elif weekday <= 4:
+        week_monday = (run_date - timedelta(days=weekday)).isoformat()
+        clause = "pick_date >= ? AND pick_date <= ?"
+        params = (week_monday, run_iso)
+    else:
+        clause = "pick_date = ?"
+        params = (run_iso,)
+
+    with connect() as conn:
+        rows = conn.execute(
+            f"""
+            SELECT source_url, title FROM daily_picks
+            WHERE pick_type IN ('timely', 'pitch')
+              AND source_url != ''
+              AND {clause}
+            """,
+            params,
+        ).fetchall()
+
+    urls = {row["source_url"] for row in rows if row["source_url"]}
+    titles = [row["title"] for row in rows if row["title"]]
+    topics = {topic_key_from_title(title) for title in titles}
+    return urls, topics, titles

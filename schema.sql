@@ -42,3 +42,19 @@ CREATE TABLE IF NOT EXISTS daily_picks (
 CREATE INDEX IF NOT EXISTS idx_stories_score ON stories(score DESC);
 CREATE INDEX IF NOT EXISTS idx_subjects_score ON interview_subjects(score DESC);
 CREATE INDEX IF NOT EXISTS idx_daily_picks_date ON daily_picks(pick_date, pick_type);
+
+CREATE TABLE IF NOT EXISTS article_performance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    airtable_id TEXT NOT NULL UNIQUE,
+    title TEXT,
+    url TEXT,
+    publish_date TEXT,
+    views REAL,
+    author TEXT,
+    section TEXT,
+    topic TEXT,
+    raw_fields TEXT,
+    synced_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_article_performance_views ON article_performance(views DESC);

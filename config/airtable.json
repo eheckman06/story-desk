@@ -1,0 +1,11 @@
+{
+  "field_map": {
+    "title": ["Title", "Headline", "Article Title", "Name", "Story"],
+    "url": ["URL", "Link", "Article URL", "Fox URL", "Published URL"],
+    "publish_date": ["Publish Date", "Date Published", "Date", "Published", "Pub Date"],
+    "views": ["Page Views", "Views", "PVs", "Traffic", "Pageviews", "Uniques"],
+    "author": ["Author", "Writer", "Byline", "Reporter"],
+    "section": ["Section", "Category", "Desk", "Beat"],
+    "topic": ["Topic", "Tags", "Theme", "Angle"]
+  }
+}

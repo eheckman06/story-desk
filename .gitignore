@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 .DS_Store
 data/story_desk.db
+data/uc_export/
+data/airtable/
 data/daily/*
 data/logs/
 data/.env
